@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Image from 'next/image';
 import { Movie } from '@/types/movie';
 import {
   ServerIcon,
@@ -9,46 +8,33 @@ import {
   FullscreenIcon,
   ExitFullscreenIcon,
   TheaterIcon,
-  SubtitlesIcon,
-  VolumeIcon,
   PlayIcon,
   BoltIcon,
   TvIcon,
   CloseIcon,
-  SparklesIcon,
   StarIcon,
-  GlobeIcon,
-  CheckIcon,
+  DownloadIcon,
 } from './Icons';
+import { DownloadModal } from './DownloadModal';
 
-// ── Streaming Server Gateway Definitions ──────────────────────────────────────
+// ── Streaming Server Gateways ──────────────────────────────────────────────────
 
 interface StreamServer {
   id: string;
   name: string;
-  nodeCode: string;
+  shortName: string;
   tag: string;
-  speed: string;
   ping: string;
-  resolution: string;
-  qualities: string[];
-  hasMultiAudio: boolean;
-  isPopular?: boolean;
   getUrl: (id: number, isTv: boolean, season: number, episode: number, trailerKey?: string) => string;
 }
 
 const STREAM_SERVERS: StreamServer[] = [
   {
     id: 'vidlink',
-    name: 'VidLink Prime',
-    nodeCode: 'NODE 01',
-    tag: 'Direct 4K Stream',
-    speed: '⚡ Ultra Fast',
+    name: 'Server 1: VidLink',
+    shortName: 'VidLink 4K',
+    tag: '4K Ultra HD',
     ping: '14ms',
-    resolution: '4K Ultra HD',
-    qualities: ['480p', '720p', '1080p', '4K'],
-    hasMultiAudio: true,
-    isPopular: true,
     getUrl: (id, isTv, season, episode) =>
       isTv
         ? `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=7c3aed&secondaryColor=a78bfa&autoplay=true`
@@ -56,15 +42,10 @@ const STREAM_SERVERS: StreamServer[] = [
   },
   {
     id: 'vidsrc_me',
-    name: 'VidSrc Ultra',
-    nodeCode: 'NODE 02',
-    tag: 'Cloud CDN 4K',
-    speed: '⚡ Lightning',
+    name: 'Server 2: VidSrc.me',
+    shortName: 'VidSrc Ultra',
+    tag: '4K Multi-Audio',
     ping: '21ms',
-    resolution: '4K Ultra HD',
-    qualities: ['360p', '720p', '1080p', '4K'],
-    hasMultiAudio: true,
-    isPopular: true,
     getUrl: (id, isTv, season, episode) =>
       isTv
         ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`
@@ -72,14 +53,10 @@ const STREAM_SERVERS: StreamServer[] = [
   },
   {
     id: 'vidsrc_to',
-    name: 'VidSrc Pro',
-    nodeCode: 'NODE 03',
-    tag: 'Optimized Buffer',
-    speed: '✓ High Speed',
+    name: 'Server 3: VidSrc.to',
+    shortName: 'VidSrc Pro',
+    tag: '1080p Crystal',
     ping: '28ms',
-    resolution: '1080p Full HD',
-    qualities: ['480p', '720p', '1080p'],
-    hasMultiAudio: true,
     getUrl: (id, isTv, season, episode) =>
       isTv
         ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
@@ -87,14 +64,10 @@ const STREAM_SERVERS: StreamServer[] = [
   },
   {
     id: 'vidsrc_pm',
-    name: 'VidSrc Stable',
-    nodeCode: 'NODE 04',
-    tag: 'Ultra-Stable Link',
-    speed: '✓ Low Jitter',
+    name: 'Server 4: VidSrc.pm',
+    shortName: 'VidSrc Stable',
+    tag: '1080p Smooth',
     ping: '32ms',
-    resolution: '1080p Full HD',
-    qualities: ['360p', '480p', '720p', '1080p'],
-    hasMultiAudio: false,
     getUrl: (id, isTv, season, episode) =>
       isTv
         ? `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`
@@ -102,14 +75,10 @@ const STREAM_SERVERS: StreamServer[] = [
   },
   {
     id: 'multiembed',
-    name: 'MultiEmbed Elite',
-    nodeCode: 'NODE 05',
-    tag: 'Redundant Mesh',
-    speed: '✓ Multi-Mirror',
+    name: 'Server 5: MultiEmbed',
+    shortName: 'MultiEmbed',
+    tag: 'Multi-Mirror',
     ping: '36ms',
-    resolution: '1080p Full HD',
-    qualities: ['480p', '720p', '1080p'],
-    hasMultiAudio: true,
     getUrl: (id, isTv, season, episode) =>
       isTv
         ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`
@@ -117,14 +86,10 @@ const STREAM_SERVERS: StreamServer[] = [
   },
   {
     id: 'smashy',
-    name: 'SmashyStream Edge',
-    nodeCode: 'NODE 06',
-    tag: 'Global Edge Relay',
-    speed: '~ Steady',
+    name: 'Server 6: SmashyStream',
+    shortName: 'SmashyStream',
+    tag: 'Multi-Dub',
     ping: '41ms',
-    resolution: '1080p Full HD',
-    qualities: ['360p', '720p', '1080p'],
-    hasMultiAudio: true,
     getUrl: (id, isTv, season, episode) =>
       isTv
         ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`
@@ -132,52 +97,15 @@ const STREAM_SERVERS: StreamServer[] = [
   },
   {
     id: '2embed',
-    name: '2Embed Reserve',
-    nodeCode: 'NODE 07',
-    tag: 'Failover Standby',
-    speed: '~ Backup Node',
+    name: 'Server 7: 2Embed',
+    shortName: '2Embed Backup',
+    tag: 'Backup Node',
     ping: '48ms',
-    resolution: '1080p Full HD',
-    qualities: ['480p', '720p', '1080p'],
-    hasMultiAudio: false,
     getUrl: (id, isTv, season, episode) =>
       isTv
         ? `https://www.2embed.skin/embedtv/${id}&s=${season}&e=${episode}`
         : `https://www.2embed.skin/embed/${id}`,
   },
-];
-
-// ── Quality & Audio Definitions ───────────────────────────────────────────────
-
-const QUALITIES = [
-  { label: '4K Ultra HD', res: '2160p', desc: 'True Cinema Bitrate • Dolby Atmos', badge: 'Ultra HDR' },
-  { label: '1080p Full HD', res: '1080p', desc: 'Crystal Clear • 60 FPS Smooth', badge: 'Recommended' },
-  { label: '720p HD Ready', res: '720p', desc: 'Balanced Quality • Fast Buffering', badge: 'Fast' },
-  { label: '480p Standard', res: '480p', desc: 'Standard Def • Lower Bandwidth', badge: 'Lite' },
-  { label: '360p Data Saver', res: '360p', desc: 'Mobile Optimized • Zero Stutter', badge: 'Mobile' },
-  { label: 'Auto Adaptive', res: 'Dynamic', desc: 'Smart AI Bitrate Allocation', badge: 'Auto' },
-];
-
-const AUDIO_TRACKS = [
-  { id: 'en', label: 'English', format: 'Original 5.1 Surround', badge: 'Default' },
-  { id: 'es', label: 'Spanish (Español)', format: 'Studio Dub • Stereo', badge: 'Multi-Dub' },
-  { id: 'fr', label: 'French (Français)', format: 'Studio Dub • Stereo', badge: 'Multi-Dub' },
-  { id: 'de', label: 'German (Deutsch)', format: 'Studio Dub • Stereo', badge: 'Multi-Dub' },
-  { id: 'ja', label: 'Japanese (日本語)', format: 'Original Master • Stereo', badge: 'Original' },
-  { id: 'pt', label: 'Portuguese (Português)', format: 'Studio Dub • Stereo', badge: 'Multi-Dub' },
-  { id: 'it', label: 'Italian (Italiano)', format: 'Studio Dub • Stereo', badge: 'Multi-Dub' },
-  { id: 'ar', label: 'Arabic (العربية)', format: 'Studio Dub • Stereo', badge: 'Multi-Dub' },
-];
-
-const SUBTITLE_LANGS = [
-  { id: 'off', label: 'Off', desc: 'No Subtitles' },
-  { id: 'en', label: 'English', desc: 'Full Dialogue' },
-  { id: 'es', label: 'Spanish', desc: 'Español CC' },
-  { id: 'fr', label: 'French', desc: 'Français CC' },
-  { id: 'de', label: 'German', desc: 'Deutsch CC' },
-  { id: 'ja', label: 'Japanese', desc: '日本語字幕' },
-  { id: 'pt', label: 'Portuguese', desc: 'Português CC' },
-  { id: 'ar', label: 'Arabic', desc: 'عربي' },
 ];
 
 const MAX_FREEZE_RETRIES = 3;
@@ -201,18 +129,13 @@ export function VideoPlayer({
   const [season, setSeason] = useState<number>(initialSeason);
   const [episode, setEpisode] = useState<number>(initialEpisode);
   const [totalEpisodes] = useState<number>(24);
-  const [selectedQuality, setSelectedQuality] = useState<string>('4K Ultra HD');
-  const [selectedAudio, setSelectedAudio] = useState<string>('en');
-  const [selectedSubtitle, setSelectedSubtitle] = useState<string>('off');
-  const [customSubtitleName, setCustomSubtitleName] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState<number>(0);
   const [streamStatus, setStreamStatus] = useState<'loading' | 'playing' | 'frozen'>('loading');
   const [freezeRetryCount, setFreezeRetryCount] = useState<number>(0);
   const [notification, setNotification] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [theaterMode, setTheaterMode] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'servers' | 'episodes' | 'quality' | 'audio' | 'subtitles'>('servers');
-  const [serverDropdownOpen, setServerDropdownOpen] = useState<boolean>(false);
+  const [showDownloadModal, setShowDownloadModal] = useState<boolean>(false);
 
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -230,29 +153,6 @@ export function VideoPlayer({
     showNotification('Stream connection refreshed');
   }, [showNotification]);
 
-  const handleQualityChange = useCallback((q: string) => {
-    setSelectedQuality(q);
-    showNotification(`Resolution set to ${q}`);
-  }, [showNotification]);
-
-  const handleAudioChange = useCallback((track: { id: string; label: string }) => {
-    setSelectedAudio(track.id);
-    showNotification(`Audio set to ${track.label}`);
-  }, [showNotification]);
-
-  const handleSubtitleChange = useCallback((sub: { id: string; label: string }) => {
-    setSelectedSubtitle(sub.id);
-    showNotification(sub.id === 'off' ? 'Subtitles disabled' : `Subtitles: ${sub.label}`);
-  }, [showNotification]);
-
-  const handleCustomSubtitleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setCustomSubtitleName(file.name);
-      showNotification(`Custom subtitle track loaded: ${file.name}`);
-    }
-  }, [showNotification]);
-
   const handleAutoFailover = useCallback(() => {
     const idx = STREAM_SERVERS.findIndex((s) => s.id === selectedServer);
     const next = STREAM_SERVERS[(idx + 1) % STREAM_SERVERS.length];
@@ -260,7 +160,7 @@ export function VideoPlayer({
     setReloadKey((k) => k + 1);
     setStreamStatus('loading');
     setFreezeRetryCount(0);
-    showNotification(`Rerouted to ${next.name}`);
+    showNotification(`Switched to ${next.name}`);
   }, [selectedServer, showNotification]);
 
   const handleAutoReconnect = useCallback(() => {
@@ -282,7 +182,7 @@ export function VideoPlayer({
     setFreezeRetryCount(0);
   }, [selectedServer]);
 
-  // Silent popup suppressor: instantly closes any stray external windows in milliseconds
+  // Silent popup suppressor: instantly closes any unsolicited external popup
   useEffect(() => {
     const originalOpen = window.open;
     window.open = function (...args: Parameters<typeof window.open>) {
@@ -302,7 +202,7 @@ export function VideoPlayer({
     };
   }, []);
 
-  // Hardware fullscreen event listener
+  // Sync fullscreen state
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(Boolean(document.fullscreenElement));
@@ -315,7 +215,7 @@ export function VideoPlayer({
     };
   }, []);
 
-  // Fullscreen keyboard shortcut 'F'
+  // Keyboard shortcut 'F' for fullscreen
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'f' || e.key === 'F') {
@@ -375,153 +275,86 @@ export function VideoPlayer({
           : 'rounded-2xl overflow-hidden'
       }`}
     >
-      {/* ── TOP BAR: Million-Dollar Cinema Header ── */}
+      {/* ── TOP HEADER: Clean Minimalist Cinema Bar ── */}
       <div
-        className={`relative z-20 flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 bg-gradient-to-r from-[#0c0d16]/95 via-[#131627]/95 to-[#0c0d16]/95 backdrop-blur-xl border-b border-white/10 ${
+        className={`relative z-20 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#0d0f18]/95 backdrop-blur-xl border-b border-white/10 ${
           isFullscreen ? 'hidden' : ''
         }`}
       >
-        {/* Left: Metadata & Status Beacon */}
+        {/* Left: Title & Metadata */}
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold tracking-wider uppercase">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>LIVE</span>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+            <h2 className="font-extrabold text-sm sm:text-base text-white tracking-wide truncate max-w-[200px] sm:max-w-md">
+              {title}
+            </h2>
           </div>
-
-          <div className="h-4 w-px bg-white/15 hidden sm:block" />
-
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="font-extrabold text-sm sm:text-base text-white tracking-wide truncate">
-                {title}
-              </h2>
-              {releaseYear && (
-                <span className="text-xs text-gray-400 font-medium">({releaseYear})</span>
-              )}
-              {isTv && (
-                <span className="px-2 py-0.5 rounded-md bg-purple-600/30 border border-purple-500/50 text-purple-300 text-[11px] font-bold tracking-wide">
-                  S{season} : E{episode}
-                </span>
-              )}
-              <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-yellow-400 text-[11px] font-bold flex items-center gap-1">
-                <StarIcon className="w-3 h-3 fill-current" />
-                {rating}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-[11px] text-gray-400 mt-0.5">
-              <span className="text-purple-400 font-semibold flex items-center gap-1">
-                <ServerIcon className="w-3 h-3" />
-                {currentServerObj.name}
-              </span>
-              <span>•</span>
-              <span className="text-gray-300">{currentServerObj.resolution}</span>
-              <span>•</span>
-              <span className="text-emerald-400 font-mono">{currentServerObj.ping}</span>
-            </div>
-          </div>
+          {releaseYear && (
+            <span className="text-xs text-gray-400 hidden sm:inline">({releaseYear})</span>
+          )}
+          {isTv && (
+            <span className="px-2 py-0.5 rounded bg-purple-600/30 border border-purple-500/40 text-purple-300 text-xs font-bold">
+              S{season} : E{episode}
+            </span>
+          )}
+          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-yellow-400 text-xs font-bold flex items-center gap-1 hidden sm:flex">
+            <StarIcon className="w-3 h-3 fill-current" />
+            {rating}
+          </span>
         </div>
 
-        {/* Right: Quick Controls & Actions */}
+        {/* Right: Actions (Download, Reload, Theater, Fullscreen, Close) */}
         <div className="flex items-center gap-2 ml-auto">
-          {/* Server Selector Quick Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setServerDropdownOpen(!serverDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/50 text-xs font-semibold text-gray-200 transition-all shadow-sm"
-              title="Switch streaming server node"
-            >
-              <ServerIcon className="w-3.5 h-3.5 text-purple-400" />
-              <span className="hidden md:inline">{currentServerObj.nodeCode}:</span>
-              <span>{currentServerObj.name}</span>
-              <span className="text-[10px] text-gray-400">▼</span>
-            </button>
+          {/* Download Button */}
+          <button
+            onClick={() => setShowDownloadModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition-all text-xs font-bold active:scale-95 shadow-sm shadow-purple-600/20"
+            title="Download Movie for Offline Playback"
+          >
+            <DownloadIcon className="w-4 h-4" />
+            <span>Download</span>
+          </button>
 
-            {serverDropdownOpen && (
-              <div
-                className="absolute right-0 top-11 w-64 rounded-2xl bg-[#0f1220] border border-purple-500/30 shadow-2xl p-2 z-50 animate-fadeIn backdrop-blur-2xl"
-                onMouseLeave={() => setServerDropdownOpen(false)}
-              >
-                <div className="px-3 py-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-white/10 mb-1 flex items-center justify-between">
-                  <span>Fast Gateways (7)</span>
-                  <span className="text-emerald-400">100% Online</span>
-                </div>
-                <div className="space-y-1">
-                  {STREAM_SERVERS.map((srv) => {
-                    const isAct = selectedServer === srv.id;
-                    return (
-                      <button
-                        key={srv.id}
-                        onClick={() => {
-                          setSelectedServer(srv.id);
-                          setServerDropdownOpen(false);
-                          showNotification(`Connected to ${srv.name}`);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all text-left ${
-                          isAct
-                            ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-600/40'
-                            : 'text-gray-300 hover:bg-white/10 hover:text-white'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${isAct ? 'bg-white' : 'bg-emerald-400'}`} />
-                          <div>
-                            <p className="font-semibold">{srv.name}</p>
-                            <p className={`text-[10px] ${isAct ? 'text-purple-200' : 'text-gray-400'}`}>
-                              {srv.tag}
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isAct ? 'bg-purple-700 text-white' : 'bg-black/40 text-emerald-400'}`}>
-                          {srv.ping}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Reload Stream Button */}
+          {/* Reload Stream */}
           <button
             onClick={handleRefreshStream}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-semibold active:scale-95"
-            title="Reload current stream node"
+            className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-semibold flex items-center gap-1"
+            title="Reload Stream"
           >
             <RefreshIcon className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Reload</span>
           </button>
 
-          {/* Theater Mode Button */}
+          {/* Theater Mode */}
           <button
             onClick={() => setTheaterMode(!theaterMode)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+            className={`p-1.5 sm:px-3 sm:py-1.5 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1 ${
               theaterMode
-                ? 'bg-purple-600/30 border-purple-500 text-purple-300 shadow-sm'
+                ? 'bg-purple-600/30 border-purple-500 text-purple-300'
                 : 'bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border-white/10'
             }`}
-            title={theaterMode ? 'Exit Theater Mode' : 'Theater Cinema Mode'}
+            title="Theater Mode"
           >
             <TheaterIcon className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Theater</span>
           </button>
 
-          {/* Full Screen Button (Million-Dollar Gradient Accent) */}
+          {/* Full Screen Button */}
           <button
             onClick={toggleFullscreen}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold tracking-wide shadow-lg shadow-purple-600/30 transition-all active:scale-95 border border-purple-400/40"
-            title="Enter Full Screen Mode (F)"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold tracking-wide shadow-md shadow-purple-600/30 transition-all active:scale-95 border border-purple-400/40"
+            title="Full Screen (F)"
           >
-            <FullscreenIcon className="w-4 h-4" />
+            <FullscreenIcon className="w-3.5 h-3.5" />
             <span>Full Screen</span>
           </button>
 
-          {/* Close Player (if modal) */}
+          {/* Close Button */}
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-gray-300 hover:text-red-400 border border-white/10 hover:border-red-500/30 transition-all"
-              title="Close Player"
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all"
+              title="Close"
             >
               <CloseIcon className="w-4 h-4" />
             </button>
@@ -535,10 +368,6 @@ export function VideoPlayer({
           isFullscreen ? 'flex-1 h-screen' : 'aspect-video'
         }`}
       >
-        {/* Soft Ambient Cinematic Glow behind iframe */}
-        <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/10 via-indigo-600/10 to-purple-600/10 blur-3xl opacity-50 pointer-events-none" />
-
-        {/* Video Iframe: Always rendered cleanly, no restrictive sandbox */}
         <iframe
           ref={iframeRef}
           key={`${selectedServer}-${season}-${episode}-${reloadKey}`}
@@ -551,55 +380,40 @@ export function VideoPlayer({
           onLoad={() => setStreamStatus('playing')}
         />
 
-        {/* High-End Branded Loading Overlay */}
+        {/* Loading Overlay */}
         {streamStatus === 'loading' && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md pointer-events-none">
-            <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-2 border-purple-500/20 animate-ping" />
-              <div className="w-14 h-14 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <PlayIcon className="w-6 h-6 text-purple-400 fill-current ml-0.5" />
-              </div>
+            <div className="relative w-14 h-14 mb-3 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+              <PlayIcon className="w-5 h-5 text-purple-400 fill-current ml-0.5 absolute" />
             </div>
-            <div className="flex items-center gap-2 text-white font-extrabold text-sm tracking-wide">
-              <span>Connecting to</span>
-              <span className="text-purple-400">{currentServerObj.name}</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">Establishing high-bandwidth 4K stream link...</p>
+            <p className="text-white font-bold text-sm">Connecting to {currentServerObj.name}...</p>
+            <p className="text-xs text-gray-400 mt-0.5">Stream starting momentarily</p>
           </div>
         )}
 
-        {/* Stream Stalled / Freeze Diagnostic Assistant */}
+        {/* Stalled / Buffer Helper */}
         {streamStatus === 'frozen' && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#070912]/90 backdrop-blur-lg px-6 animate-fadeIn">
-            <div className="max-w-md w-full bg-[#101424] border border-purple-500/40 rounded-2xl p-6 text-center shadow-2xl space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center mx-auto text-purple-400">
-                <BoltIcon className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-white tracking-wide">Stream Optimization Needed</h3>
-                <p className="text-xs text-gray-400 mt-1">
-                  The current gateway is taking longer to deliver frames. Switch to another high-speed server node or reconnect.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md px-6 animate-fadeIn">
+            <div className="max-w-sm w-full bg-[#101424] border border-purple-500/40 rounded-2xl p-5 text-center shadow-2xl space-y-3">
+              <h3 className="text-base font-extrabold text-white">Stream Buffering?</h3>
+              <p className="text-xs text-gray-400">Try auto-switching to the next fast server node or reconnect.</p>
+              <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleAutoFailover}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/40 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition"
                 >
-                  <ServerIcon className="w-4 h-4" />
-                  <span>Auto-Reroute to Next Node</span>
+                  Switch Server
                 </button>
                 <button
                   onClick={handleAutoReconnect}
-                  className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 font-semibold text-xs transition-all flex items-center justify-center gap-1.5"
+                  className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 text-xs font-semibold transition"
                 >
-                  <RefreshIcon className="w-4 h-4" />
-                  <span>Reconnect</span>
+                  Reconnect
                 </button>
                 <button
                   onClick={() => setStreamStatus('playing')}
-                  className="px-3 py-2.5 rounded-xl text-gray-400 hover:text-white text-xs"
+                  className="py-2 px-3 rounded-xl text-gray-400 hover:text-white text-xs"
                 >
                   Dismiss
                 </button>
@@ -608,220 +422,103 @@ export function VideoPlayer({
           </div>
         )}
 
-        {/* Subtle "Stream Buffering?" trigger button (visible on hover when playing) */}
+        {/* Subtle buffering helper on hover */}
         {streamStatus === 'playing' && (
           <button
             onClick={() => setStreamStatus('frozen')}
-            className="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/70 hover:bg-purple-600 text-gray-300 hover:text-white text-[11px] font-semibold transition-all opacity-0 group-hover:opacity-100 backdrop-blur-md border border-white/10"
-            title="Click if stream is buffering or stuck"
+            className="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/75 hover:bg-purple-600 text-gray-300 hover:text-white text-[11px] font-semibold transition-all opacity-0 group-hover:opacity-100 backdrop-blur-md border border-white/10"
+            title="Switch server if buffering"
           >
             <BoltIcon className="w-3.5 h-3.5 text-yellow-400" />
-            <span>Stream Stalled? Switch Node</span>
+            <span>Buffering? Switch Server</span>
           </button>
         )}
 
-        {/* Minimal Fullscreen Exit Pill (hover top-right) */}
+        {/* Fullscreen Exit Pill */}
         {isFullscreen && (
           <button
             onClick={toggleFullscreen}
             className="absolute top-5 right-5 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-black/80 hover:bg-purple-600 text-white text-xs font-bold transition-all opacity-0 group-hover:opacity-100 backdrop-blur-md border border-white/20 shadow-2xl"
-            title="Exit Fullscreen (Esc or F)"
           >
             <ExitFullscreenIcon className="w-4 h-4" />
             <span>Exit Fullscreen</span>
           </button>
         )}
 
-        {/* Sleek Floating Toast */}
+        {/* Notification Toast */}
         {notification && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-[#121626]/95 border border-purple-500/50 text-white rounded-full text-xs font-semibold shadow-2xl backdrop-blur-xl flex items-center gap-2.5 animate-fadeIn pointer-events-none">
-            <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-            <span>{notification}</span>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-1.5 bg-[#121626]/95 border border-purple-500/50 text-white rounded-full text-xs font-semibold shadow-2xl backdrop-blur-xl animate-fadeIn pointer-events-none">
+            {notification}
           </div>
         )}
       </div>
 
-      {/* ── THE MILLION-DOLLAR CONSOLE DECK (Under Video) ── */}
-      <div className={`flex flex-col bg-[#0b0d18] border-t border-white/10 p-4 sm:p-6 space-y-5 ${isFullscreen ? 'hidden' : ''}`}>
-        {/* Navigation Tabs Bar */}
-        <div className="flex items-center justify-between flex-wrap gap-2 border-b border-white/10 pb-3">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-            <button
-              onClick={() => setActiveTab('servers')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'servers'
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 border border-purple-400/30'
-                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
-              }`}
-            >
-              <ServerIcon className="w-4 h-4" />
-              <span>Streaming Nodes (7)</span>
-            </button>
+      {/* ── STREAMLINED BOTTOM CONTROLS: Clean Single-Row Server Pills + Offline Download ── */}
+      <div className={`flex flex-col bg-[#0b0d18] border-t border-white/10 px-4 sm:px-6 py-4 space-y-4 ${isFullscreen ? 'hidden' : ''}`}>
+        {/* Row 1: Clean Horizontal Server Pills + Download CTA */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            <span className="text-[11px] uppercase font-bold text-gray-400 whitespace-nowrap flex items-center gap-1 mr-1">
+              <ServerIcon className="w-3.5 h-3.5 text-purple-400" />
+              <span>Switch Server:</span>
+            </span>
 
-            {isTv && (
-              <button
-                onClick={() => setActiveTab('episodes')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                  activeTab === 'episodes'
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 border border-purple-400/30'
-                    : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
-                }`}
-              >
-                <TvIcon className="w-4 h-4" />
-                <span>Episodes (Season {season})</span>
-              </button>
-            )}
-
-            <button
-              onClick={() => setActiveTab('quality')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'quality'
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 border border-purple-400/30'
-                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
-              }`}
-            >
-              <BoltIcon className="w-4 h-4" />
-              <span>Quality ({selectedQuality})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('audio')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'audio'
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 border border-purple-400/30'
-                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
-              }`}
-            >
-              <VolumeIcon className="w-4 h-4" />
-              <span>Audio Tracks</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('subtitles')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'subtitles'
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 border border-purple-400/30'
-                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
-              }`}
-            >
-              <SubtitlesIcon className="w-4 h-4" />
-              <span>Subtitles</span>
-            </button>
+            {STREAM_SERVERS.map((srv, idx) => {
+              const isAct = selectedServer === srv.id;
+              return (
+                <button
+                  key={srv.id}
+                  onClick={() => {
+                    setSelectedServer(srv.id);
+                    showNotification(`Switched to ${srv.name}`);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                    isAct
+                      ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-1 ring-purple-400'
+                      : 'bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/5'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${isAct ? 'bg-white' : 'bg-emerald-400'}`} />
+                  <span>Server {idx + 1}: {srv.shortName}</span>
+                </button>
+              );
+            })}
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 text-xs text-gray-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-semibold text-gray-300">Stitch Stream High-Speed Fiber Network</span>
-          </div>
+          {/* Quick Offline Download Pill */}
+          <button
+            onClick={() => setShowDownloadModal(true)}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-md shadow-purple-600/30 whitespace-nowrap ml-auto"
+          >
+            <DownloadIcon className="w-3.5 h-3.5" />
+            <span>Download Movie</span>
+          </button>
         </div>
 
-        {/* ── TAB 1: Streaming Nodes Grid ── */}
-        {activeTab === 'servers' && (
-          <div className="space-y-3 animate-fadeIn">
+        {/* Row 2: TV Episodes Matrix (Shown only if TV Series) */}
+        {isTv && (
+          <div className="pt-2 border-t border-white/5 space-y-2">
             <div className="flex items-center justify-between text-xs text-gray-400">
-              <span className="font-medium text-gray-300">
-                Enterprise CDN Gateway Mirrors • Click any node to switch instantly:
-              </span>
-              <span className="text-emerald-400 font-mono text-[11px] hidden sm:inline">
-                ● 7 of 7 Operational
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {STREAM_SERVERS.map((server) => {
-                const isActive = selectedServer === server.id;
-                return (
-                  <div
-                    key={server.id}
-                    onClick={() => {
-                      setSelectedServer(server.id);
-                      showNotification(`Switched to ${server.name}`);
-                    }}
-                    className={`relative p-4 rounded-2xl border transition-all cursor-pointer group ${
-                      isActive
-                        ? 'bg-gradient-to-br from-purple-950/70 via-purple-900/30 to-[#0e111d] border-purple-500 shadow-xl shadow-purple-600/20 ring-1 ring-purple-400/40'
-                        : 'bg-[#101423]/70 hover:bg-[#161c30] border-white/10 hover:border-purple-500/40'
-                    }`}
-                  >
-                    {/* Top Row: Node Code & Status */}
-                    <div className="flex items-center justify-between mb-2">
-                      <span
-                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                          isActive
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-white/10 text-gray-400 group-hover:text-purple-300'
-                        }`}
-                      >
-                        {server.nodeCode}
-                      </span>
-                      {isActive ? (
-                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          <span>ACTIVE NOW</span>
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-gray-400 font-mono flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/70" />
-                          <span>{server.ping}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Server Name & Tagline */}
-                    <h4 className="font-extrabold text-sm text-white group-hover:text-purple-300 transition-colors">
-                      {server.name}
-                    </h4>
-                    <p className="text-xs text-gray-400 mt-0.5">{server.tag}</p>
-
-                    {/* Features Strip */}
-                    <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-white/5 text-[10px]">
-                      <span className="px-2 py-0.5 rounded-md bg-white/5 text-gray-300 font-semibold">
-                        {server.resolution}
-                      </span>
-                      {server.hasMultiAudio && (
-                        <span className="px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/30 text-blue-300 font-semibold">
-                          Multi-Audio
-                        </span>
-                      )}
-                      <span className="ml-auto text-emerald-400 font-semibold">{server.speed}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── TAB 2: TV Episodes Hub ── */}
-        {isTv && activeTab === 'episodes' && (
-          <div className="space-y-4 animate-fadeIn">
-            <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-gray-300">Season:</span>
-                <div className="flex items-center gap-1.5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setSeason(s)}
-                      className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
-                        season === s
-                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
-                          : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white'
-                      }`}
-                    >
-                      Season {s}
-                    </button>
-                  ))}
-                </div>
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSeason(s)}
+                    className={`px-2.5 py-0.5 rounded-lg text-xs font-bold transition-all ${
+                      season === s
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-white/5 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    S{s}
+                  </button>
+                ))}
               </div>
-              <span className="text-gray-400">
-                Playing Episode <strong className="text-white">{episode}</strong> of Season{' '}
-                <strong className="text-white">{season}</strong>
-              </span>
+              <span className="text-[11px] text-gray-400">Playing Episode {episode}</span>
             </div>
 
-            {/* Episode Buttons Grid */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2 max-h-56 overflow-y-auto pr-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
               {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((ep) => {
                 const isActive = episode === ep;
                 return (
@@ -831,150 +528,30 @@ export function VideoPlayer({
                       setEpisode(ep);
                       showNotification(`Playing Season ${season} - Episode ${ep}`);
                     }}
-                    className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-center flex flex-col items-center justify-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex-none ${
                       isActive
-                        ? 'bg-gradient-to-b from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/40 ring-2 ring-purple-400'
-                        : 'bg-[#121626] text-gray-300 hover:bg-[#1a2035] hover:text-white border border-white/5'
+                        ? 'bg-purple-600 text-white ring-1 ring-purple-400'
+                        : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                   >
-                    <span>EP {ep}</span>
-                    {isActive && <span className="w-1 h-1 rounded-full bg-white animate-ping" />}
+                    EP {ep}
                   </button>
                 );
               })}
-            </div>
-          </div>
-        )}
-
-        {/* ── TAB 3: Quality & Resolution Selector ── */}
-        {activeTab === 'quality' && (
-          <div className="space-y-4 animate-fadeIn">
-            <div className="text-xs text-gray-300">
-              Select stream resolution and bandwidth profile:
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {QUALITIES.map((q) => {
-                const isActive = selectedQuality === q.label;
-                return (
-                  <div
-                    key={q.label}
-                    onClick={() => handleQualityChange(q.label)}
-                    className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                      isActive
-                        ? 'bg-purple-600/20 border-purple-500 ring-1 ring-purple-400 shadow-xl shadow-purple-600/20'
-                        : 'bg-[#101423] hover:bg-[#161c30] border-white/10 hover:border-purple-500/30'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-extrabold text-sm text-white">{q.label}</span>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          isActive ? 'bg-purple-600 text-white' : 'bg-white/10 text-gray-400'
-                        }`}
-                      >
-                        {q.badge}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-400">{q.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── TAB 4: Audio Dubs ── */}
-        {activeTab === 'audio' && (
-          <div className="space-y-4 animate-fadeIn">
-            <div className="text-xs text-gray-300">
-              Select your preferred audio language track (supported on Node 1, 2, 3 & 6):
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {AUDIO_TRACKS.map((track) => {
-                const isActive = selectedAudio === track.id;
-                return (
-                  <div
-                    key={track.id}
-                    onClick={() => handleAudioChange(track)}
-                    className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
-                      isActive
-                        ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-400 shadow-md shadow-blue-600/20'
-                        : 'bg-[#101423] hover:bg-[#161c30] border-white/10 hover:border-blue-500/30'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <VolumeIcon className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-gray-400'}`} />
-                      <div>
-                        <p className="font-bold text-xs text-white">{track.label}</p>
-                        <p className="text-[10px] text-gray-400">{track.format}</p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-mono text-gray-400 bg-white/5 px-2 py-0.5 rounded-md">
-                      {track.badge}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── TAB 5: Subtitles & Captions ── */}
-        {activeTab === 'subtitles' && (
-          <div className="space-y-4 animate-fadeIn">
-            <div className="text-xs text-gray-300">
-              Select caption track or load your own custom subtitle file:
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {SUBTITLE_LANGS.map((sub) => {
-                const isActive = selectedSubtitle === sub.id && !customSubtitleName;
-                return (
-                  <button
-                    key={sub.id}
-                    onClick={() => {
-                      setCustomSubtitleName(null);
-                      handleSubtitleChange(sub);
-                    }}
-                    className={`p-3 rounded-xl border text-left transition-all ${
-                      isActive
-                        ? 'bg-purple-600 text-white border-purple-400 shadow-lg shadow-purple-600/30 font-bold'
-                        : 'bg-[#101423] hover:bg-[#161c30] text-gray-300 hover:text-white border-white/10'
-                    }`}
-                  >
-                    <p className="text-xs font-bold">{sub.label}</p>
-                    <p className={`text-[10px] ${isActive ? 'text-purple-200' : 'text-gray-400'}`}>
-                      {sub.desc}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Custom Subtitle File Uploader */}
-            <div className="p-4 rounded-2xl bg-[#101424] border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div>
-                <span className="font-bold text-white block">Load Custom Subtitle File (.srt, .vtt)</span>
-                <span className="text-gray-400 text-[11px]">
-                  {customSubtitleName ? (
-                    <span className="text-emerald-400 font-semibold">Active: {customSubtitleName}</span>
-                  ) : (
-                    'Have an external subtitle file on your device? Upload to sync instantly.'
-                  )}
-                </span>
-              </div>
-              <label className="cursor-pointer px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition text-xs shadow-md shadow-purple-600/30">
-                <span>Browse File</span>
-                <input
-                  type="file"
-                  accept=".srt,.vtt"
-                  className="hidden"
-                  onChange={handleCustomSubtitleUpload}
-                />
-              </label>
             </div>
           </div>
         )}
       </div>
+
+      {/* Download Center Modal */}
+      <DownloadModal
+        movie={movie}
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        isTv={isTv}
+        season={season}
+        episode={episode}
+      />
     </div>
   );
 }
