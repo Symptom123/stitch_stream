@@ -47,6 +47,18 @@ export function MovieDetailModal({
     }
   }, [movie]);
 
+  // Lock body scroll when modal is open so only the modal scrolls smoothly
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   if (!isOpen || !movie) return null;
 
   const inWatchlist = isInWatchlist(movie.id);
@@ -63,21 +75,23 @@ export function MovieDetailModal({
 
   return (
     <>
+      {/* Scrollable Backdrop Container - items-start ensures top of modal is always reachable */}
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/90 backdrop-blur-md overflow-y-auto animate-fadeIn"
+        className="fixed inset-0 z-50 overflow-y-auto overscroll-contain p-2 sm:p-4 md:p-6 bg-black/90 backdrop-blur-md animate-fadeIn flex justify-center items-start"
         onClick={onClose}
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <div
-          className={`relative w-full ${
+          className={`relative w-full my-4 sm:my-8 ${
             isPlaying ? 'max-w-6xl' : 'max-w-4xl'
-          } bg-[#0e111a] border border-gray-800 rounded-2xl overflow-hidden shadow-2xl my-auto text-white transition-all duration-300 transform`}
+          } bg-[#0e111a] border border-gray-800 rounded-2xl overflow-hidden shadow-2xl text-white transition-all duration-300 transform`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button (shown when not playing) */}
           {!isPlaying && (
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-black/75 hover:bg-black/95 text-gray-300 hover:text-white transition-all backdrop-blur-sm border border-white/10"
+              className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-black/75 hover:bg-black/95 text-gray-300 hover:text-white transition-all backdrop-blur-sm border border-white/10 shadow-lg"
               aria-label="Close"
             >
               <CloseIcon className="w-5 h-5" />

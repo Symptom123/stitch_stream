@@ -14,6 +14,8 @@ import {
   CloseIcon,
   StarIcon,
   DownloadIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from './Icons';
 import { DownloadModal } from './DownloadModal';
 
@@ -139,6 +141,7 @@ export function VideoPlayer({
 
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const episodesScrollRef = useRef<HTMLDivElement>(null);
   const notifTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showNotification = useCallback((msg: string) => {
@@ -178,11 +181,37 @@ export function VideoPlayer({
     }
   }, [freezeRetryCount, handleAutoFailover, handleAutoReconnect]);
 
+  const scrollEpisodes = (direction: 'left' | 'right') => {
+    if (episodesScrollRef.current) {
+      const scrollAmount = 280;
+      episodesScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  // Convert mouse wheel to horizontal scroll on episodes row
+  useEffect(() => {
+    const el = episodesScrollRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [isTv]);
+
   useEffect(() => {
     setFreezeRetryCount(0);
   }, [selectedServer]);
 
-  // Silent popup suppressor: instantly closes any unsolicited external popup
+  // Silent popup suppressor
   useEffect(() => {
     const originalOpen = window.open;
     window.open = function (...args: Parameters<typeof window.open>) {
@@ -215,7 +244,7 @@ export function VideoPlayer({
     };
   }, []);
 
-  // Keyboard shortcut 'F' for fullscreen
+  // Keyboard shortcut 'F'
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'f' || e.key === 'F') {
@@ -453,14 +482,14 @@ export function VideoPlayer({
         )}
       </div>
 
-      {/* ── STREAMLINED BOTTOM CONTROLS: Clean Single-Row Server Pills + Offline Download ── */}
+      {/* ── EASY-TO-USE CONTROLS: Flex-Wrap Server Pills (No difficult scrolling!) ── */}
       <div className={`flex flex-col bg-[#0b0d18] border-t border-white/10 px-4 sm:px-6 py-4 space-y-4 ${isFullscreen ? 'hidden' : ''}`}>
-        {/* Row 1: Clean Horizontal Server Pills + Download CTA */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            <span className="text-[11px] uppercase font-bold text-gray-400 whitespace-nowrap flex items-center gap-1 mr-1">
+        {/* Row 1: Flex-Wrapped Server Pills (All 7 servers visible at a glance) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] uppercase font-bold text-gray-400 whitespace-nowrap flex items-center gap-1.5 mr-1">
               <ServerIcon className="w-3.5 h-3.5 text-purple-400" />
-              <span>Switch Server:</span>
+              <span>Select Server:</span>
             </span>
 
             {STREAM_SERVERS.map((srv, idx) => {
@@ -472,7 +501,7 @@ export function VideoPlayer({
                     setSelectedServer(srv.id);
                     showNotification(`Switched to ${srv.name}`);
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                     isAct
                       ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-1 ring-purple-400'
                       : 'bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/5'
@@ -488,16 +517,16 @@ export function VideoPlayer({
           {/* Quick Offline Download Pill */}
           <button
             onClick={() => setShowDownloadModal(true)}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-md shadow-purple-600/30 whitespace-nowrap ml-auto"
+            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-md shadow-purple-600/30 whitespace-nowrap self-start sm:self-auto active:scale-95 transition-all"
           >
             <DownloadIcon className="w-3.5 h-3.5" />
             <span>Download Movie</span>
           </button>
         </div>
 
-        {/* Row 2: TV Episodes Matrix (Shown only if TV Series) */}
+        {/* Row 2: TV Episodes with Smooth Arrow Controls & Wheel Scroll */}
         {isTv && (
-          <div className="pt-2 border-t border-white/5 space-y-2">
+          <div className="pt-3 border-t border-white/5 space-y-2">
             <div className="flex items-center justify-between text-xs text-gray-400">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-gray-300">Season:</span>
@@ -515,10 +544,34 @@ export function VideoPlayer({
                   </button>
                 ))}
               </div>
-              <span className="text-[11px] text-gray-400">Playing Episode {episode}</span>
+
+              {/* Navigation Arrows for Episodes */}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-gray-400 hidden sm:inline">Playing Ep {episode}</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => scrollEpisodes('left')}
+                    className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition"
+                    title="Scroll Episodes Left"
+                  >
+                    <ChevronLeftIcon className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => scrollEpisodes('right')}
+                    className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition"
+                    title="Scroll Episodes Right"
+                  >
+                    <ChevronRightIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            {/* Scrollable Episodes List with Wheel Event Listener */}
+            <div
+              ref={episodesScrollRef}
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-1"
+            >
               {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((ep) => {
                 const isActive = episode === ep;
                 return (
@@ -530,7 +583,7 @@ export function VideoPlayer({
                     }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex-none ${
                       isActive
-                        ? 'bg-purple-600 text-white ring-1 ring-purple-400'
+                        ? 'bg-purple-600 text-white ring-1 ring-purple-400 shadow-sm'
                         : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                   >
