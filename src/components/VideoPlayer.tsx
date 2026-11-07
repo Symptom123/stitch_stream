@@ -465,18 +465,6 @@ export function VideoPlayer({
           </div>
         )}
 
-        {/* Subtle buffering helper on hover */}
-        {streamStatus === 'playing' && (
-          <button
-            onClick={() => setStreamStatus('frozen')}
-            className="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/75 hover:bg-purple-600 text-gray-300 hover:text-white text-[11px] font-semibold transition-all opacity-0 group-hover:opacity-100 backdrop-blur-md border border-white/10"
-            title="Switch server if buffering"
-          >
-            <BoltIcon className="w-3.5 h-3.5 text-yellow-400" />
-            <span>Buffering? Switch Server</span>
-          </button>
-        )}
-
         {/* Fullscreen Exit Pill */}
         {isFullscreen && (
           <button
