@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Movie } from '@/types/movie';
 import { getImageUrl, FALLBACK_BACKDROP } from '@/lib/tmdb';
@@ -38,12 +38,17 @@ export function MovieDetailModal({
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [backdropSrc, setBackdropSrc] = useState<string>('');
+  const [isScrolledDown, setIsScrolledDown] = useState(false);
+
+  const modalContainerRef = useRef<HTMLDivElement>(null);
+  const detailsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (movie) {
       setBackdropSrc(getImageUrl(movie.backdrop_path || movie.poster_path, 'original'));
       setIsPlaying(false);
       setShowDownloadModal(false);
+      setIsScrolledDown(false);
     }
   }, [movie]);
 
@@ -58,6 +63,37 @@ export function MovieDetailModal({
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  // Track scroll position to show "Back to Video" button
+  const handleContainerScroll = () => {
+    if (modalContainerRef.current) {
+      setIsScrolledDown(modalContainerRef.current.scrollTop > 350);
+    }
+  };
+
+  // Keyboard navigation for effortless scrolling (ArrowDown, ArrowUp, PageDown, PageUp)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'PageDown'].includes(e.key)) {
+        modalContainerRef.current?.scrollBy({ top: 320, behavior: 'smooth' });
+      } else if (['ArrowUp', 'PageUp'].includes(e.key)) {
+        modalContainerRef.current?.scrollBy({ top: -320, behavior: 'smooth' });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  const scrollToDetails = () => {
+    detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const scrollToTop = () => {
+    modalContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (!isOpen || !movie) return null;
 
@@ -77,6 +113,8 @@ export function MovieDetailModal({
     <>
       {/* Scrollable Backdrop Container - items-start ensures top of modal is always reachable */}
       <div
+        ref={modalContainerRef}
+        onScroll={handleContainerScroll}
         className="fixed inset-0 z-50 overflow-y-auto overscroll-contain p-2 sm:p-4 md:p-6 bg-black/90 backdrop-blur-md animate-fadeIn flex justify-center items-start"
         onClick={onClose}
         style={{ WebkitOverflowScrolling: 'touch' }}
@@ -100,7 +138,12 @@ export function MovieDetailModal({
 
           {/* Video Player or Cinematic Backdrop */}
           {isPlaying ? (
-            <VideoPlayer movie={movie} onClose={onClose} isTv={isTv} />
+            <VideoPlayer
+              movie={movie}
+              onClose={onClose}
+              isTv={isTv}
+              onScrollToDetails={scrollToDetails}
+            />
           ) : (
             <div className="relative aspect-video w-full bg-black overflow-hidden group">
               <Image
@@ -147,13 +190,16 @@ export function MovieDetailModal({
             </div>
           )}
 
-          {/* Modal Info & Synopsis */}
-          <div className="p-6 sm:p-8 space-y-6">
+          {/* Modal Info & Synopsis Section */}
+          <div ref={detailsRef} className="p-6 sm:p-8 space-y-6">
             {/* Action Row */}
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-800 pb-5">
               <div className="flex items-center gap-3 flex-wrap">
                 <button
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={() => {
+                    setIsPlaying(!isPlaying);
+                    if (!isPlaying) scrollToTop();
+                  }}
                   className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold shadow-lg shadow-purple-600/30 transition active:scale-95 text-sm sm:text-base"
                 >
                   <PlayIcon className="w-5 h-5 fill-current" />
@@ -247,6 +293,17 @@ export function MovieDetailModal({
             </div>
           </div>
         </div>
+
+        {/* Floating Quick Navigation Pill: Back to Video when scrolled down */}
+        {isPlaying && isScrolledDown && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-2xl shadow-purple-600/50 backdrop-blur-md border border-purple-400/40 animate-fadeIn active:scale-95 transition-all"
+          >
+            <PlayIcon className="w-4 h-4 fill-current" />
+            <span>Back to Video ↑</span>
+          </button>
+        )}
       </div>
 
       {/* Standalone Download Modal */}

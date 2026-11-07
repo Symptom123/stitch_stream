@@ -16,6 +16,7 @@ import {
   DownloadIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  InfoIcon,
 } from './Icons';
 import { DownloadModal } from './DownloadModal';
 
@@ -118,6 +119,7 @@ interface VideoPlayerProps {
   initialSeason?: number;
   initialEpisode?: number;
   onClose?: () => void;
+  onScrollToDetails?: () => void;
 }
 
 export function VideoPlayer({
@@ -126,6 +128,7 @@ export function VideoPlayer({
   initialSeason = 1,
   initialEpisode = 1,
   onClose,
+  onScrollToDetails,
 }: VideoPlayerProps) {
   const [selectedServer, setSelectedServer] = useState<string>(STREAM_SERVERS[0].id);
   const [season, setSeason] = useState<number>(initialSeason);
@@ -306,48 +309,59 @@ export function VideoPlayer({
     >
       {/* ── TOP HEADER: Clean Minimalist Cinema Bar ── */}
       <div
-        className={`relative z-20 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#0d0f18]/95 backdrop-blur-xl border-b border-white/10 ${
+        className={`relative z-20 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-[#0d0f18]/95 backdrop-blur-xl border-b border-white/10 ${
           isFullscreen ? 'hidden' : ''
         }`}
       >
         {/* Left: Title & Metadata */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            <h2 className="font-extrabold text-sm sm:text-base text-white tracking-wide truncate max-w-[200px] sm:max-w-md">
-              {title}
-            </h2>
-          </div>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse flex-none" />
+          <h2 className="font-extrabold text-sm sm:text-base text-white tracking-wide truncate max-w-[180px] sm:max-w-md">
+            {title}
+          </h2>
           {releaseYear && (
             <span className="text-xs text-gray-400 hidden sm:inline">({releaseYear})</span>
           )}
           {isTv && (
-            <span className="px-2 py-0.5 rounded bg-purple-600/30 border border-purple-500/40 text-purple-300 text-xs font-bold">
+            <span className="px-2 py-0.5 rounded bg-purple-600/30 border border-purple-500/40 text-purple-300 text-xs font-bold flex-none">
               S{season} : E{episode}
             </span>
           )}
-          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-yellow-400 text-xs font-bold flex items-center gap-1 hidden sm:flex">
+          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-yellow-400 text-xs font-bold flex items-center gap-1 hidden md:flex">
             <StarIcon className="w-3 h-3 fill-current" />
             {rating}
           </span>
         </div>
 
-        {/* Right: Actions (Download, Reload, Theater, Fullscreen, Close) */}
-        <div className="flex items-center gap-2 ml-auto">
+        {/* Right: Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
+          {/* Scroll to Details Button */}
+          {onScrollToDetails && (
+            <button
+              onClick={onScrollToDetails}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-medium"
+              title="Scroll to Movie Synopsis & Details"
+            >
+              <InfoIcon className="w-3.5 h-3.5 text-purple-400" />
+              <span className="hidden sm:inline">Details</span>
+              <span>↓</span>
+            </button>
+          )}
+
           {/* Download Button */}
           <button
             onClick={() => setShowDownloadModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition-all text-xs font-bold active:scale-95 shadow-sm shadow-purple-600/20"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition-all text-xs font-bold active:scale-95 shadow-sm shadow-purple-600/20"
             title="Download Movie for Offline Playback"
           >
-            <DownloadIcon className="w-4 h-4" />
+            <DownloadIcon className="w-3.5 h-3.5" />
             <span>Download</span>
           </button>
 
           {/* Reload Stream */}
           <button
             onClick={handleRefreshStream}
-            className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-semibold flex items-center gap-1"
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-semibold flex items-center gap-1"
             title="Reload Stream"
           >
             <RefreshIcon className="w-3.5 h-3.5" />
@@ -357,7 +371,7 @@ export function VideoPlayer({
           {/* Theater Mode */}
           <button
             onClick={() => setTheaterMode(!theaterMode)}
-            className={`p-1.5 sm:px-3 sm:py-1.5 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1 ${
+            className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1 ${
               theaterMode
                 ? 'bg-purple-600/30 border-purple-500 text-purple-300'
                 : 'bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border-white/10'
@@ -371,7 +385,7 @@ export function VideoPlayer({
           {/* Full Screen Button */}
           <button
             onClick={toggleFullscreen}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold tracking-wide shadow-md shadow-purple-600/30 transition-all active:scale-95 border border-purple-400/40"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold tracking-wide shadow-md shadow-purple-600/30 transition-all active:scale-95 border border-purple-400/40"
             title="Full Screen (F)"
           >
             <FullscreenIcon className="w-3.5 h-3.5" />
@@ -391,10 +405,10 @@ export function VideoPlayer({
         </div>
       </div>
 
-      {/* ── CINEMA VIDEO FRAME: Pristine Viewport ── */}
+      {/* ── CINEMA VIDEO FRAME: Viewport-Constrained Sizing (Fits screen perfectly so no scroll fighting!) ── */}
       <div
         className={`relative w-full bg-black overflow-hidden shadow-2xl group ${
-          isFullscreen ? 'flex-1 h-screen' : 'aspect-video'
+          isFullscreen ? 'flex-1 h-screen' : 'aspect-video max-h-[62vh] min-h-[260px]'
         }`}
       >
         <iframe
@@ -482,10 +496,10 @@ export function VideoPlayer({
         )}
       </div>
 
-      {/* ── EASY-TO-USE CONTROLS: Flex-Wrap Server Pills (No difficult scrolling!) ── */}
-      <div className={`flex flex-col bg-[#0b0d18] border-t border-white/10 px-4 sm:px-6 py-4 space-y-4 ${isFullscreen ? 'hidden' : ''}`}>
+      {/* ── EASY-TO-USE CONTROLS: Flex-Wrap Server Pills ── */}
+      <div className={`flex flex-col bg-[#0b0d18] border-t border-white/10 px-4 sm:px-6 py-3.5 space-y-3 ${isFullscreen ? 'hidden' : ''}`}>
         {/* Row 1: Flex-Wrapped Server Pills (All 7 servers visible at a glance) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] uppercase font-bold text-gray-400 whitespace-nowrap flex items-center gap-1.5 mr-1">
               <ServerIcon className="w-3.5 h-3.5 text-purple-400" />
@@ -517,7 +531,7 @@ export function VideoPlayer({
           {/* Quick Offline Download Pill */}
           <button
             onClick={() => setShowDownloadModal(true)}
-            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-md shadow-purple-600/30 whitespace-nowrap self-start sm:self-auto active:scale-95 transition-all"
+            className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-md shadow-purple-600/30 whitespace-nowrap self-start sm:self-auto active:scale-95 transition-all"
           >
             <DownloadIcon className="w-3.5 h-3.5" />
             <span>Download Movie</span>
@@ -526,7 +540,7 @@ export function VideoPlayer({
 
         {/* Row 2: TV Episodes with Smooth Arrow Controls & Wheel Scroll */}
         {isTv && (
-          <div className="pt-3 border-t border-white/5 space-y-2">
+          <div className="pt-2.5 border-t border-white/5 space-y-2">
             <div className="flex items-center justify-between text-xs text-gray-400">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-gray-300">Season:</span>
@@ -567,7 +581,7 @@ export function VideoPlayer({
               </div>
             </div>
 
-            {/* Scrollable Episodes List with Wheel Event Listener */}
+            {/* Scrollable Episodes List */}
             <div
               ref={episodesScrollRef}
               className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-1"

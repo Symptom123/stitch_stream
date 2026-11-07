@@ -21,23 +21,29 @@ body {
   min-height: 100vh;
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Smooth & Visible */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090a0f;
+  background: rgba(9, 10, 15, 0.95);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #241a3d;
-  border-radius: 4px;
+  background: #5b21b6;
+  border-radius: 6px;
+  border: 2px solid rgba(9, 10, 15, 0.95);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #7c3aed;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6d28d9 rgba(9, 10, 15, 0.7);
 }
 
 /* Hide scrollbar for clean horizontal rows */
