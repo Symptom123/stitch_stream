@@ -61,11 +61,11 @@ export function HeroBanner({ featuredMovies, onSelectMovie }: HeroBannerProps) {
       </div>
 
       {/* Content Overlay */}
-      <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-8 md:px-12 flex flex-col justify-end pb-16 sm:pb-24">
-        <div className="max-w-2xl space-y-4">
+      <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-8 md:px-12 flex flex-col justify-end pb-12 sm:pb-24">
+        <div className="max-w-2xl space-y-3 sm:space-y-4">
           {/* Metadata pill badge */}
-          <div className="flex items-center gap-2.5">
-            <span className="px-2.5 py-0.5 text-xs font-black rounded bg-purple-600 text-white tracking-widest shadow-md">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
+            <span className="px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-black rounded bg-purple-600 text-white tracking-widest shadow-md">
               STITCH STREAM SPOTLIGHT
             </span>
             <div className="flex items-center gap-1 text-yellow-400 text-xs font-bold bg-black/60 px-2 py-0.5 rounded backdrop-blur-xs">
@@ -77,49 +77,50 @@ export function HeroBanner({ featuredMovies, onSelectMovie }: HeroBannerProps) {
                 {releaseYear}
               </span>
             )}
-            <span className="text-xs font-bold text-gray-400 border border-gray-700 px-1.5 py-0.2 rounded">
+            <span className="text-xs font-bold text-gray-400 border border-gray-700 px-1.5 py-0.2 rounded hidden xs:inline">
               4K ULTRA HD
             </span>
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-lg">
+          <h1 className="text-2xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-lg line-clamp-2 sm:line-clamp-none">
             {title}
           </h1>
 
           {/* Overview */}
-          <p className="text-gray-300 text-sm sm:text-base line-clamp-3 md:line-clamp-4 leading-relaxed max-w-xl text-shadow">
+          <p className="text-gray-300 text-xs sm:text-base line-clamp-2 sm:line-clamp-3 md:line-clamp-4 leading-relaxed max-w-xl text-shadow">
             {currentMovie.overview}
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="flex items-center gap-2 sm:gap-3 pt-2">
             <button
               onClick={() => onSelectMovie(currentMovie)}
-              className="flex items-center gap-2.5 px-6 sm:px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-xl hover:shadow-purple-600/40 transition duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 sm:px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-xl hover:shadow-purple-600/40 transition duration-200 transform hover:-translate-y-0.5 active:scale-95 min-h-[44px]"
             >
               <PlayIcon className="w-5 h-5 fill-current" />
-              <span>Watch Now</span>
+              <span className="text-sm sm:text-base">Watch Now</span>
             </button>
 
             <button
               onClick={() => onSelectMovie(currentMovie)}
-              className="flex items-center gap-2 px-5 py-3 bg-white/15 hover:bg-white/25 text-white rounded-xl font-semibold backdrop-blur-md transition border border-white/15"
+              className="flex items-center justify-center gap-1.5 px-4 sm:px-5 py-3 bg-white/15 hover:bg-white/25 text-white rounded-xl font-semibold backdrop-blur-md transition border border-white/15 active:scale-95 min-h-[44px]"
             >
-              <InfoIcon className="w-5 h-5" />
-              <span>More Info</span>
+              <InfoIcon className="w-5 h-5 text-gray-200" />
+              <span className="text-sm sm:text-base hidden xs:inline">Details</span>
             </button>
 
             <button
               onClick={() =>
                 inWatchlist ? removeFromWatchlist(currentMovie.id) : addToWatchlist(currentMovie)
               }
-              className={`p-3 rounded-xl border transition backdrop-blur-md ${
+              className={`p-3 rounded-xl border transition backdrop-blur-md active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center ${
                 inWatchlist
                   ? 'bg-purple-600/90 border-purple-400 text-white'
                   : 'bg-black/50 border-white/20 text-white hover:bg-white/20'
               }`}
               title={inWatchlist ? 'Remove from My List' : 'Add to My List'}
+              aria-label={inWatchlist ? 'Remove from My List' : 'Add to My List'}
             >
               {inWatchlist ? <CheckIcon className="w-5 h-5" /> : <PlusIcon className="w-5 h-5" />}
             </button>
@@ -127,18 +128,22 @@ export function HeroBanner({ featuredMovies, onSelectMovie }: HeroBannerProps) {
         </div>
 
         {/* Carousel indicator thumbnails / dots */}
-        <div className="flex items-center gap-2 pt-8">
+        <div className="flex items-center gap-2 pt-6 sm:pt-8">
           {movies.map((m, idx) => (
             <button
               key={m.id}
               onClick={() => setCurrentIndex(idx)}
-              className={`transition-all duration-300 rounded-full ${
-                idx === currentIndex
-                  ? 'w-8 h-2 bg-purple-600 shadow-md shadow-purple-600/50'
-                  : 'w-2 h-2 bg-gray-600 hover:bg-gray-400'
-              }`}
+              className={`transition-all duration-300 rounded-full p-1.5 flex items-center justify-center`}
               aria-label={`Slide ${idx + 1}`}
-            />
+            >
+              <span
+                className={`block transition-all duration-300 rounded-full ${
+                  idx === currentIndex
+                    ? 'w-8 h-2 bg-purple-600 shadow-md shadow-purple-600/50'
+                    : 'w-2 h-2 bg-gray-600 hover:bg-gray-400'
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>

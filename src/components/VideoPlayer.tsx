@@ -309,37 +309,37 @@ export function VideoPlayer({
     >
       {/* ── TOP HEADER: Clean Minimalist Cinema Bar ── */}
       <div
-        className={`relative z-20 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-[#0d0f18]/95 backdrop-blur-xl border-b border-white/10 ${
+        className={`relative z-20 flex items-center justify-between gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-[#0d0f18]/95 backdrop-blur-xl border-b border-white/10 ${
           isFullscreen ? 'hidden' : ''
         }`}
       >
         {/* Left: Title & Metadata */}
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse flex-none" />
-          <h2 className="font-extrabold text-sm sm:text-base text-white tracking-wide truncate max-w-[180px] sm:max-w-md">
+          <h2 className="font-extrabold text-xs sm:text-base text-white tracking-wide truncate max-w-[130px] xs:max-w-[200px] sm:max-w-md">
             {title}
           </h2>
           {releaseYear && (
             <span className="text-xs text-gray-400 hidden sm:inline">({releaseYear})</span>
           )}
           {isTv && (
-            <span className="px-2 py-0.5 rounded bg-purple-600/30 border border-purple-500/40 text-purple-300 text-xs font-bold flex-none">
-              S{season} : E{episode}
+            <span className="px-1.5 sm:px-2 py-0.5 rounded bg-purple-600/30 border border-purple-500/40 text-purple-300 text-[10px] sm:text-xs font-bold flex-none">
+              S{season}:E{episode}
             </span>
           )}
-          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-yellow-400 text-xs font-bold flex items-center gap-1 hidden md:flex">
+          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-yellow-400 text-xs font-bold items-center gap-1 hidden md:flex">
             <StarIcon className="w-3 h-3 fill-current" />
             {rating}
           </span>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
+        <div className="flex items-center gap-1 sm:gap-2 ml-auto flex-none">
           {/* Scroll to Details Button */}
           {onScrollToDetails && (
             <button
               onClick={onScrollToDetails}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-medium"
+              className="hidden xs:flex items-center gap-1 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-medium"
               title="Scroll to Movie Synopsis & Details"
             >
               <InfoIcon className="w-3.5 h-3.5 text-purple-400" />
@@ -351,27 +351,27 @@ export function VideoPlayer({
           {/* Download Button */}
           <button
             onClick={() => setShowDownloadModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition-all text-xs font-bold active:scale-95 shadow-sm shadow-purple-600/20"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition-all text-xs font-bold active:scale-95 shadow-sm shadow-purple-600/20"
             title="Download Movie for Offline Playback"
           >
             <DownloadIcon className="w-3.5 h-3.5" />
-            <span>Download</span>
+            <span className="hidden xs:inline">Download</span>
           </button>
 
           {/* Reload Stream */}
           <button
             onClick={handleRefreshStream}
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-semibold flex items-center gap-1"
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-all text-xs font-semibold flex items-center gap-1 active:scale-95"
             title="Reload Stream"
           >
             <RefreshIcon className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Reload</span>
           </button>
 
-          {/* Theater Mode */}
+          {/* Theater Mode (Desktop only) */}
           <button
             onClick={() => setTheaterMode(!theaterMode)}
-            className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1 ${
+            className={`hidden md:flex p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border text-xs font-semibold transition-all items-center gap-1 ${
               theaterMode
                 ? 'bg-purple-600/30 border-purple-500 text-purple-300'
                 : 'bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border-white/10'
@@ -385,18 +385,18 @@ export function VideoPlayer({
           {/* Full Screen Button */}
           <button
             onClick={toggleFullscreen}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold tracking-wide shadow-md shadow-purple-600/30 transition-all active:scale-95 border border-purple-400/40"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold tracking-wide shadow-md shadow-purple-600/30 transition-all active:scale-95 border border-purple-400/40"
             title="Full Screen (F)"
           >
             <FullscreenIcon className="w-3.5 h-3.5" />
-            <span>Full Screen</span>
+            <span className="hidden xs:inline">Full</span>
           </button>
 
           {/* Close Button */}
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all"
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all active:scale-95"
               title="Close"
             >
               <CloseIcon className="w-4 h-4" />
@@ -496,14 +496,14 @@ export function VideoPlayer({
         )}
       </div>
 
-      {/* ── EASY-TO-USE CONTROLS: Flex-Wrap Server Pills ── */}
-      <div className={`flex flex-col bg-[#0b0d18] border-t border-white/10 px-4 sm:px-6 py-3.5 space-y-3 ${isFullscreen ? 'hidden' : ''}`}>
-        {/* Row 1: Flex-Wrapped Server Pills (All 7 servers visible at a glance) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] uppercase font-bold text-gray-400 whitespace-nowrap flex items-center gap-1.5 mr-1">
+      {/* ── EASY-TO-USE CONTROLS: Mobile Touch-Friendly Server Pills ── */}
+      <div className={`flex flex-col bg-[#0b0d18] border-t border-white/10 px-3 sm:px-6 py-2.5 sm:py-3.5 space-y-2.5 sm:space-y-3 ${isFullscreen ? 'hidden' : ''}`}>
+        {/* Row 1: Smooth Horizontal Scrollable Server Pills on Mobile, Wrapped on Desktop */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1 sm:flex-wrap" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <span className="text-[10px] sm:text-[11px] uppercase font-bold text-gray-400 whitespace-nowrap flex items-center gap-1 mr-1 flex-none">
               <ServerIcon className="w-3.5 h-3.5 text-purple-400" />
-              <span>Select Server:</span>
+              <span className="hidden xs:inline">Select Server:</span>
             </span>
 
             {STREAM_SERVERS.map((srv, idx) => {
@@ -515,14 +515,14 @@ export function VideoPlayer({
                     setSelectedServer(srv.id);
                     showNotification(`Switched to ${srv.name}`);
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-none min-h-[36px] active:scale-95 ${
                     isAct
                       ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-1 ring-purple-400'
                       : 'bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/5'
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${isAct ? 'bg-white' : 'bg-emerald-400'}`} />
-                  <span>Server {idx + 1}: {srv.shortName}</span>
+                  <span>S{idx + 1}: {srv.shortName}</span>
                 </button>
               );
             })}
@@ -531,7 +531,7 @@ export function VideoPlayer({
           {/* Quick Offline Download Pill */}
           <button
             onClick={() => setShowDownloadModal(true)}
-            className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-md shadow-purple-600/30 whitespace-nowrap self-start sm:self-auto active:scale-95 transition-all"
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-md shadow-purple-600/30 whitespace-nowrap w-full sm:w-auto active:scale-95 transition-all min-h-[40px] sm:min-h-0"
           >
             <DownloadIcon className="w-3.5 h-3.5" />
             <span>Download Movie</span>

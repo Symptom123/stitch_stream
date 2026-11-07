@@ -72,37 +72,38 @@ export function DownloadModal({
 
   return (
     <div
-      className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-fadeIn"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-6 bg-black/85 backdrop-blur-md animate-fadeIn"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xl bg-[#0e111d] border border-purple-500/30 rounded-3xl overflow-hidden shadow-2xl text-white transform transition-all"
+        className="relative w-full max-w-xl bg-[#0e111d] border border-purple-500/30 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl text-white transform transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/10 bg-white/[0.02]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
+            <div className="w-8 h-8 rounded-xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-400 flex-none">
               <DownloadIcon className="w-4 h-4" />
             </div>
             <div>
               <h3 className="font-extrabold text-sm sm:text-base text-white">Download Center</h3>
-              <p className="text-[11px] text-gray-400">High-Speed Offline Playback (4K & 1080p)</p>
+              <p className="text-[10px] sm:text-[11px] text-gray-400">High-Speed Offline Playback (4K & 1080p)</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition"
+            className="min-w-[38px] min-h-[38px] flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition active:scale-95"
+            aria-label="Close"
           >
             <CloseIcon className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto no-scrollbar">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 max-h-[80vh] overflow-y-auto no-scrollbar">
           {/* Movie Preview Card */}
-          <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10">
-            <div className="relative w-16 h-22 flex-none rounded-xl overflow-hidden bg-gray-900 shadow-md">
+          <div className="flex items-center gap-3 sm:gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/10">
+            <div className="relative w-14 sm:w-16 h-20 sm:h-22 flex-none rounded-xl overflow-hidden bg-gray-900 shadow-md">
               <Image src={posterUrl} alt={title} fill unoptimized className="object-cover" />
             </div>
             <div className="flex-1 min-w-0">
@@ -112,44 +113,44 @@ export function DownloadModal({
                 </span>
                 {releaseYear && <span className="text-xs text-gray-400">({releaseYear})</span>}
               </div>
-              <h4 className="font-bold text-base text-white truncate mt-1">{title}</h4>
-              <p className="text-xs text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
+              <h4 className="font-bold text-sm sm:text-base text-white truncate mt-1">{title}</h4>
+              <p className="text-[11px] sm:text-xs text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
                 <span>✓ Verified Full Movie Releases Ready</span>
               </p>
             </div>
           </div>
 
           {/* Download Method Selector Tabs */}
-          <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 border-b border-white/10 pb-2 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button
               onClick={() => setActiveTab('torrents')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex-none min-h-[38px] active:scale-95 ${
                 activeTab === 'torrents'
                   ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
                   : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
               }`}
             >
-              🧲 Fast Torrent / Magnet (4K & 1080p)
+              🧲 Magnet & Torrents
             </button>
             <button
               onClick={() => setActiveTab('web')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex-none min-h-[38px] active:scale-95 ${
                 activeTab === 'web'
                   ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
                   : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
               }`}
             >
-              ⚡ Web MP4 Downloader
+              ⚡ Web MP4
             </button>
             <button
               onClick={() => setActiveTab('helper')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex-none min-h-[38px] active:scale-95 ${
                 activeTab === 'helper'
                   ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
                   : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
               }`}
             >
-              💡 Direct Browser Guide
+              💡 Browser Guide
             </button>
           </div>
 

@@ -112,22 +112,22 @@ export function MovieRow({
 
       {/* Row Container with Large Side Navigation Buttons */}
       <div className="relative">
-        {/* Left Scroll Overlay Button */}
+        {/* Left Scroll Overlay Button (desktop) */}
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-0 bottom-0 z-30 w-10 sm:w-12 bg-black/80 hover:bg-purple-950/90 text-white flex items-center justify-center opacity-70 group-hover/row:opacity-100 transition-all backdrop-blur-sm rounded-r-xl border-r border-y border-white/10 shadow-2xl hover:scale-105"
+            className="hidden sm:flex absolute left-0 top-0 bottom-0 z-30 w-10 sm:w-12 bg-black/80 hover:bg-purple-950/90 text-white items-center justify-center opacity-70 group-hover/row:opacity-100 transition-all backdrop-blur-sm rounded-r-xl border-r border-y border-white/10 shadow-2xl hover:scale-105"
             aria-label="Scroll left"
           >
             <ChevronLeftIcon className="w-6 h-6 text-purple-300" />
           </button>
         )}
 
-        {/* Scrollable movies list: Smooth wheel, momentum scroll */}
+        {/* Scrollable movies list: Smooth wheel, momentum scroll & touch snap */}
         <div
           ref={rowRef}
-          className="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1 cursor-grab active:cursor-grabbing"
-          style={{ overscrollBehaviorX: 'contain' }}
+          className="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1 snap-x snap-mandatory cursor-grab active:cursor-grabbing"
+          style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
         >
           {movies.map((movie) => (
             <MovieCard
@@ -139,11 +139,11 @@ export function MovieRow({
           ))}
         </div>
 
-        {/* Right Scroll Overlay Button */}
+        {/* Right Scroll Overlay Button (desktop) */}
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-0 bottom-0 z-30 w-10 sm:w-12 bg-black/80 hover:bg-purple-950/90 text-white flex items-center justify-center opacity-70 group-hover/row:opacity-100 transition-all backdrop-blur-sm rounded-l-xl border-l border-y border-white/10 shadow-2xl hover:scale-105"
+            className="hidden sm:flex absolute right-0 top-0 bottom-0 z-30 w-10 sm:w-12 bg-black/80 hover:bg-purple-950/90 text-white items-center justify-center opacity-70 group-hover/row:opacity-100 transition-all backdrop-blur-sm rounded-l-xl border-l border-y border-white/10 shadow-2xl hover:scale-105"
             aria-label="Scroll right"
           >
             <ChevronRightIcon className="w-6 h-6 text-purple-300" />

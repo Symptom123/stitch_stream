@@ -29,8 +29,8 @@ export function MovieCard({ movie, onSelect, size = 'normal' }: MovieCardProps) 
   return (
     <div
       onClick={() => onSelect(movie)}
-      className={`group relative flex-none cursor-pointer select-none rounded-xl overflow-hidden bg-[#121622] transition-all duration-300 hover:scale-105 hover:z-20 hover:shadow-2xl hover:shadow-purple-950/40 border border-gray-800/80 hover:border-purple-600/60 ${
-        size === 'large' ? 'w-48 sm:w-56' : 'w-36 sm:w-44 md:w-48'
+      className={`group relative flex-none cursor-pointer select-none rounded-xl overflow-hidden bg-[#121622] transition-all duration-300 hover:scale-105 active:scale-95 hover:z-20 hover:shadow-2xl hover:shadow-purple-950/40 border border-gray-800/80 hover:border-purple-600/60 snap-start ${
+        size === 'large' ? 'w-44 sm:w-56' : 'w-32 sm:w-44 md:w-48'
       }`}
     >
       {/* Poster Image Container */}

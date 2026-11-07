@@ -13,6 +13,10 @@ import {
   HeartIcon,
   MenuIcon,
   FlameIcon,
+  HomeIcon,
+  FilmIcon,
+  TvIcon,
+  StarIcon,
 } from './Icons';
 
 interface NavbarProps {
@@ -233,10 +237,13 @@ export function Navbar({ onSelectMovie, onFilterChange, activeFilter }: NavbarPr
                       <h4 className="text-sm font-semibold text-white truncate">{item.title || item.name}</h4>
                       <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">{item.overview}</p>
                       <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-500">
-                        <span className="text-yellow-400 font-bold">â˜… {item.vote_average ? item.vote_average.toFixed(1) : '8.0'}</span>
-                        <span>â€¢</span>
+                        <span className="text-yellow-400 font-bold flex items-center gap-1">
+                          <StarIcon className="w-3 h-3 fill-current inline" />
+                          {item.vote_average ? item.vote_average.toFixed(1) : '8.0'}
+                        </span>
+                        <span>•</span>
                         <span className="capitalize">{item.media_type || 'Movie'}</span>
-                        <span>â€¢</span>
+                        <span>•</span>
                         <span>{(item.release_date || item.first_air_date || '').split('-')[0]}</span>
                       </div>
                     </div>
@@ -251,6 +258,89 @@ export function Navbar({ onSelectMovie, onFilterChange, activeFilter }: NavbarPr
           </div>
         </div>
       )}
+
+      {/* ── MOBILE APP-STYLE BOTTOM NAVIGATION BAR (Thumb-friendly, Netflix/Disney+ style) ── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0c0e18]/95 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-around py-2 px-1 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-2xl">
+        <button
+          onClick={() => {
+            onFilterChange('all');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center justify-center flex-1 py-1 px-1 transition-all min-h-[44px] ${
+            activeFilter === 'all'
+              ? 'text-purple-400 font-bold scale-105'
+              : 'text-gray-400 hover:text-white'
+          }`}
+          aria-label="Home"
+        >
+          <HomeIcon className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px] tracking-tight">Home</span>
+        </button>
+
+        <button
+          onClick={() => {
+            onFilterChange('movie');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center justify-center flex-1 py-1 px-1 transition-all min-h-[44px] ${
+            activeFilter === 'movie'
+              ? 'text-purple-400 font-bold scale-105'
+              : 'text-gray-400 hover:text-white'
+          }`}
+          aria-label="Movies"
+        >
+          <FilmIcon className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px] tracking-tight">Movies</span>
+        </button>
+
+        <button
+          onClick={() => {
+            onFilterChange('tv');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center justify-center flex-1 py-1 px-1 transition-all min-h-[44px] ${
+            activeFilter === 'tv'
+              ? 'text-purple-400 font-bold scale-105'
+              : 'text-gray-400 hover:text-white'
+          }`}
+          aria-label="TV Series"
+        >
+          <TvIcon className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px] tracking-tight">TV Shows</span>
+        </button>
+
+        <button
+          onClick={() => {
+            onFilterChange('watchlist');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`relative flex flex-col items-center justify-center flex-1 py-1 px-1 transition-all min-h-[44px] ${
+            activeFilter === 'watchlist'
+              ? 'text-purple-400 font-bold scale-105'
+              : 'text-gray-400 hover:text-white'
+          }`}
+          aria-label="My Watchlist"
+        >
+          <div className="relative">
+            <HeartIcon className="w-5 h-5 mb-0.5" />
+            {watchlist.length > 0 && (
+              <span className="absolute -top-1 -right-2 px-1.5 py-0.2 bg-purple-600 text-[9px] text-white font-black rounded-full shadow-sm shadow-purple-600/50">
+                {watchlist.length}
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] tracking-tight">My List</span>
+        </button>
+
+        <button
+          onClick={handleOpenSearch}
+          className="flex flex-col items-center justify-center flex-1 py-1 px-1 text-gray-400 hover:text-white transition-all active:scale-95 min-h-[44px]"
+          aria-label="Search"
+        >
+          <SearchIcon className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px] tracking-tight">Search</span>
+        </button>
+      </nav>
     </>
   );
 }

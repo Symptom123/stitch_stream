@@ -93,8 +93,8 @@ export default function Home() {
         activeFilter={filter}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1">
+      {/* Main Content Area (padding bottom for mobile bottom navigation bar) */}
+      <main className="flex-1 pb-24 md:pb-0">
         {filter === 'watchlist' ? (
           /* Watchlist View */
           <div className="pt-28 pb-16 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto space-y-6">

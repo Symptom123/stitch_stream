@@ -115,21 +115,21 @@ export function MovieDetailModal({
       <div
         ref={modalContainerRef}
         onScroll={handleContainerScroll}
-        className="fixed inset-0 z-50 overflow-y-auto overscroll-contain p-2 sm:p-4 md:p-6 bg-black/90 backdrop-blur-md animate-fadeIn flex justify-center items-start"
+        className="fixed inset-0 z-50 overflow-y-auto overscroll-contain p-0 sm:p-4 md:p-6 bg-black/90 backdrop-blur-md animate-fadeIn flex justify-center items-start"
         onClick={onClose}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <div
-          className={`relative w-full my-4 sm:my-8 ${
+          className={`relative w-full my-0 sm:my-8 min-h-screen sm:min-h-0 rounded-none sm:rounded-2xl ${
             isPlaying ? 'max-w-6xl' : 'max-w-4xl'
-          } bg-[#0e111a] border border-gray-800 rounded-2xl overflow-hidden shadow-2xl text-white transition-all duration-300 transform`}
+          } bg-[#0e111a] border-0 sm:border border-gray-800 overflow-hidden shadow-2xl text-white transition-all duration-300 transform`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button (shown when not playing) */}
           {!isPlaying && (
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-black/75 hover:bg-black/95 text-gray-300 hover:text-white transition-all backdrop-blur-sm border border-white/10 shadow-lg"
+              className="absolute top-4 right-4 z-30 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/75 hover:bg-black/95 text-gray-300 hover:text-white transition-all backdrop-blur-sm border border-white/10 shadow-lg active:scale-95"
               aria-label="Close"
             >
               <CloseIcon className="w-5 h-5" />
@@ -161,29 +161,29 @@ export function MovieDetailModal({
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                 <button
                   onClick={() => setIsPlaying(true)}
-                  className="p-6 rounded-full bg-purple-600 hover:bg-purple-500 text-white shadow-2xl shadow-purple-600/50 hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center pl-7 group/btn"
+                  className="p-5 sm:p-6 rounded-full bg-purple-600 hover:bg-purple-500 text-white shadow-2xl shadow-purple-600/50 hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center pl-6 sm:pl-7 group/btn"
                   aria-label="Play Now"
                 >
-                  <PlayIcon className="w-12 h-12 fill-current group-hover/btn:scale-105" />
+                  <PlayIcon className="w-10 h-10 sm:w-12 sm:h-12 fill-current group-hover/btn:scale-105" />
                 </button>
-                <span className="text-xs sm:text-sm font-bold text-white/90 bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                <span className="text-[11px] sm:text-sm font-bold text-white/90 bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10 text-center mx-4">
                   Stream in Ultra HD • Multi-Server Fast Playback
                 </span>
               </div>
 
               {/* Title overlay */}
-              <div className="absolute bottom-6 left-6 right-6 flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2.5 py-0.5 text-xs font-bold rounded bg-purple-600 text-white tracking-wider flex items-center gap-1">
+              <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 flex flex-col">
+                <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                  <span className="px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded bg-purple-600 text-white tracking-wider flex items-center gap-1">
                     <BoltIcon className="w-3 h-3" />
                     {movie.quality || '4K ULTRA HD'}
                   </span>
-                  <span className="px-2 py-0.5 text-xs font-semibold rounded bg-white/20 backdrop-blur-sm text-gray-200 flex items-center gap-1">
+                  <span className="px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded bg-white/20 backdrop-blur-sm text-gray-200 flex items-center gap-1">
                     {isTv ? <TvIcon className="w-3 h-3" /> : <FilmIcon className="w-3 h-3" />}
                     {isTv ? 'TV SERIES' : 'MOVIE'}
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-4xl font-black text-white drop-shadow-md">
+                <h2 className="text-xl sm:text-4xl font-black text-white drop-shadow-md">
                   {title}
                 </h2>
               </div>
@@ -191,16 +191,16 @@ export function MovieDetailModal({
           )}
 
           {/* Modal Info & Synopsis Section */}
-          <div ref={detailsRef} className="p-6 sm:p-8 space-y-6">
+          <div ref={detailsRef} className="p-4 sm:p-8 space-y-5 sm:space-y-6">
             {/* Action Row */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-800 pb-5">
-              <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-gray-800 pb-5">
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
                 <button
                   onClick={() => {
                     setIsPlaying(!isPlaying);
                     if (!isPlaying) scrollToTop();
                   }}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold shadow-lg shadow-purple-600/30 transition active:scale-95 text-sm sm:text-base"
+                  className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold shadow-lg shadow-purple-600/30 transition active:scale-95 text-sm sm:text-base min-h-[44px]"
                 >
                   <PlayIcon className="w-5 h-5 fill-current" />
                   <span>{isPlaying ? 'Overview Mode' : 'Watch Now'}</span>
@@ -208,9 +208,9 @@ export function MovieDetailModal({
 
                 <button
                   onClick={() => setShowDownloadModal(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600/25 to-indigo-600/25 hover:from-purple-600 hover:to-indigo-600 text-purple-300 hover:text-white rounded-xl font-bold border border-purple-500/40 shadow-sm transition active:scale-95 text-sm sm:text-base"
+                  className="flex items-center justify-center gap-1.5 px-3 sm:px-5 py-3 bg-gradient-to-r from-purple-600/25 to-indigo-600/25 hover:from-purple-600 hover:to-indigo-600 text-purple-300 hover:text-white rounded-xl font-bold border border-purple-500/40 shadow-sm transition active:scale-95 text-xs sm:text-base min-h-[44px]"
                 >
-                  <DownloadIcon className="w-5 h-5" />
+                  <DownloadIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Download</span>
                 </button>
 
@@ -218,7 +218,7 @@ export function MovieDetailModal({
                   onClick={() =>
                     inWatchlist ? removeFromWatchlist(movie.id) : addToWatchlist(movie)
                   }
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition active:scale-95 text-sm sm:text-base border ${
+                  className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-3 rounded-xl font-medium transition active:scale-95 text-xs sm:text-base border min-h-[44px] ${
                     inWatchlist
                       ? 'bg-purple-600/90 border-purple-400 text-white hover:bg-purple-600'
                       : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
@@ -226,12 +226,12 @@ export function MovieDetailModal({
                 >
                   {inWatchlist ? (
                     <>
-                      <CheckIcon className="w-5 h-5" />
-                      <span>In My List</span>
+                      <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>In List</span>
                     </>
                   ) : (
                     <>
-                      <PlusIcon className="w-5 h-5" />
+                      <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span>Add to List</span>
                     </>
                   )}
@@ -239,14 +239,14 @@ export function MovieDetailModal({
 
                 <button
                   onClick={handleShare}
-                  className="px-4 py-2.5 rounded-xl border border-gray-700 bg-gray-800/80 hover:bg-gray-700 text-gray-300 text-sm font-medium transition"
+                  className="col-span-2 sm:col-span-1 px-4 py-3 rounded-xl border border-gray-700 bg-gray-800/80 hover:bg-gray-700 text-gray-300 text-xs sm:text-sm font-medium transition active:scale-95 min-h-[44px]"
                 >
-                  {copied ? 'Copied Link!' : 'Share'}
+                  {copied ? '✓ Link Copied!' : 'Share Movie'}
                 </button>
               </div>
 
               {/* Rating & Metadata Badges */}
-              <div className="flex items-center gap-4 text-sm text-gray-300">
+              <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-300 self-start sm:self-auto pt-2 sm:pt-0">
                 <div className="flex items-center gap-1.5 text-yellow-400 font-bold bg-yellow-400/10 px-3 py-1 rounded-md border border-yellow-400/20">
                   <StarIcon className="w-4 h-4 fill-current" />
                   <span>{rating}</span>

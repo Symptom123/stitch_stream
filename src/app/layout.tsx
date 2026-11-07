@@ -1,13 +1,26 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { UserProvider } from "@/context/UserContext";
 import { WatchlistProvider } from "@/context/WatchlistContext";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#090a0f",
+};
 
 export const metadata: Metadata = {
   title: "Stitch Stream — Watch Movies & TV Series in Ultra HD",
   description:
     "Stitch Stream is a sleek streaming platform to discover trending movies, series, watch official trailers, and curate your personalized watchlist.",
   keywords: ["movies", "streaming", "tv shows", "watch online", "stitch stream", "trailers"],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Stitch Stream",
+  },
   icons: {
     icon: "/06_favicon.svg",
     apple: "/05_app_icon.svg",
