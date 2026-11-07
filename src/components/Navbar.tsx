@@ -13,7 +13,6 @@ import {
   HeartIcon,
   MenuIcon,
   FlameIcon,
-  ShieldCheckIcon,
 } from './Icons';
 
 interface NavbarProps {
@@ -128,12 +127,6 @@ export function Navbar({ onSelectMovie, onFilterChange, activeFilter }: NavbarPr
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-lg bg-white/10 text-gray-200 hover:text-white md:hidden" aria-label="Toggle navigation menu">
               <MenuIcon className="w-5 h-5" />
             </button>
-
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 rounded-full text-xs font-extrabold text-emerald-400 shadow-sm shadow-emerald-500/20">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <ShieldCheckIcon className="w-4 h-4 text-emerald-400" />
-              <span>Ad Shield: ON</span>
-            </div>
 
             <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-600/25 to-indigo-600/25 border border-purple-500/40 rounded-full text-xs font-semibold text-purple-300">
               <FlameIcon className="w-3.5 h-3.5 text-purple-400" />
